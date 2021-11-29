@@ -1,0 +1,28 @@
+{
+    "name": "modules/membership",
+    "description": "Membership API services",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Iwan Firmawan",
+            "email": "hi.iwan@outlook.com"
+        }
+    ],
+    "require": {
+        "laravel/framework": "^8.40"
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\Membership\\": "./src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\Membership\\ModulesMembershipServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev"
+}
