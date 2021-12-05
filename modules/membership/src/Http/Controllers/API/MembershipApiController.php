@@ -18,9 +18,11 @@ use Modules\Membership\Events\MemberRegistered;
 use Modules\Membership\Events\ResetPassword;
 use Modules\Membership\Member;
 use Modules\Membership\MemberIdentity;
+use Modules\Membership\Traits\ProfileTrait;
 
 class MembershipApiController extends Controller
 {
+    use ProfileTrait;
     public function index(Request $request)
     {
         return response()->success($request->user()->load([
@@ -49,16 +51,10 @@ class MembershipApiController extends Controller
     {
         DB::beginTransaction();
         try {
-            $nextID = DB::table('users')
-                ->selectRaw("setval(pg_get_serial_sequence('users', 'id'), coalesce(max(id)+1, 1), false) AS next_id")
-                ->first()
-                ->next_id;
-            $data['id'] = $nextID;
             $data['name'] = $request->name;
             $data['email'] = $request->email;
             $data['password'] = bcrypt($request->password);
             $user = $user->create($data);
-            $user->assignRole('member');
             $member = $this->splitFullName($data['name'] ?? '');
             $user->membership()->create($member->merge([
                 'uuid' => Str::uuid()
@@ -72,6 +68,7 @@ class MembershipApiController extends Controller
                 'user' => $user->load('membership.identities')
             ], 201);
         } catch (\Throwable $e) {
+            throw $e;
             DB::rollback();
             return response()->fail([
                 'body' => 'Oops! register new member failed'
